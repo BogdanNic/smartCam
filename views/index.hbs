@@ -1,0 +1,76 @@
+
+{{{title}}}
+
+{{{type}}}
+<style>
+
+video{
+	//border-style: solid;
+    	//border-width: 5px;
+}
+canvas{
+	//border-style: solid;
+    	//border-width: 5px;
+}
+</style>
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <button class="btn btn-default btn-success">Take snapshot</button>
+<button id="stopStreamBtn" class="btn btn-default btn-success">Stop stream</button>
+<a id="downloadBtn" download="Canvas.png"  class="btn btn-default btn-info" href="#">Save snapshot</a>
+<button id="startRecordingBtn" class="btn btn-default btn-success">Start recording</button>
+<a id="downloadRecordingBtn"  download="Canvas.webm"  class="btn btn-default btn-success" href="#">
+	<i class="material-icons" style="font-size:22px;">movie</i> Download recording</a>
+
+    </div>
+    <div class="col">
+      1 of 2
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <video class="rounded img-thumbnail" autoplay></video>
+    </div>
+    <div class="col-sm-6">
+      <canvas id="canvas" class="rounded img-thumbnail"></canvas>
+    </div>
+  </div>
+</div>
+    
+
+
+
+
+
+
+
+<script>
+  var socket = io.connect('http://localhost:3000');
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+  socket.on('image', function (data) {
+    var uint8Arr = new Uint8Array(data.buffer);
+    var binary = '';
+    for (var i = 0; i < uint8Arr.length; i++) {
+        binary += String.fromCharCode(uint8Arr[i]);
+    }
+    var base64String = window.btoa(binary);
+
+    var img = new Image();
+    img.onload = function() {
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        var x = 0, y = 0;
+        ctx.drawImage(this, x, y);
+	socket.emit("sendImage",canvas.toDataURL("image/png"));
+    }
+    img.src = 'data:image/png;base64,' + base64String;
+  });
+
+
+	
+
+</script>
