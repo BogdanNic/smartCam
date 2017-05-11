@@ -42,7 +42,7 @@ function errorCallback(error)
 {
     console.log('navigator.getUserMedia:error',error);
 }
-navigator.getUserMedia(constarints,successCallback,errorCallback);
+
 
 //..............Stop Stream...............
 
@@ -63,6 +63,10 @@ startStreamBtn.addEventListener('click', startStream, false);
 function startStream()
 {
   var sd=2;
+  if (isServer)
+  {
+    navigator.getUserMedia(constarints,successCallback,errorCallback);
+  }
 }
 
 
@@ -154,3 +158,24 @@ function download() {
     window.URL.revokeObjectURL(url);
   }, 100);
 }
+var serverBtn  = document.getElementById("serverBtn");
+var input = document.getElementById("inputServer");
+
+serverBtn.onclick =function(e){ 
+  setServer(true);
+  input.value=isServer;
+}
+var isServer=true;
+function setServer(server)
+{
+  isServer = server;
+}
+ var socket = io.connect('http://localhost:3000');
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+  socket.on('isServer',function(data){
+    isServer=data;
+    input.value=isServer;
+  });
