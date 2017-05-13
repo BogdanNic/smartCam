@@ -7,6 +7,7 @@ var localStream;
 var pc;
 var remoteStream;
 var turnReady;
+var isServer;
 
 var pcConfig = {
   'iceServers': [{
@@ -57,6 +58,11 @@ socket.on('log', function(array) {
   console.log.apply(console, array);
 });
 
+socket.on('isServer',function(data){
+    isServer=data;
+    input.value=isServer;
+});
+
 ////////////////////////////////////////////////
 
 function sendMessage(message) {
@@ -92,6 +98,7 @@ socket.on('message', function(message) {
 
 var localVideo = document.querySelector('#localvideo');
 var remoteVideo = document.querySelector('#remotevideo');
+var input = document.querySelector("#inputServer");
 
 navigator.mediaDevices.getUserMedia({
   audio: false,

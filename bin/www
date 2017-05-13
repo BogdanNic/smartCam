@@ -35,7 +35,18 @@ server.on('listening', onListening);
 var io = require('socket.io')(server);
 io.on('connection', function (socket) {
 
+
+
+if(clients.length==0)
+{
+  socket.emit("isServer",true);	
+}else{
+ socket.emit("isServer",false);	
+}
+
 clients.push(socket);
+
+
 
 // convenience function to log server messages on the client
   function log() {
