@@ -61,6 +61,18 @@ socket.on('log', function(array) {
 socket.on('isServer',function(data){
     isServer=data;
     input.value=isServer;
+    if (isServer)
+    {
+          navigator.mediaDevices.getUserMedia({
+  audio: false,
+  video: true
+})
+.then(gotStream)
+.catch(function(e) {
+  alert('getUserMedia() error: ' + e.name);
+});
+    }
+
 });
 
 ////////////////////////////////////////////////
@@ -99,15 +111,14 @@ socket.on('message', function(message) {
 var localVideo = document.querySelector('#localvideo');
 var remoteVideo = document.querySelector('#remotevideo');
 var input = document.querySelector("#inputServer");
+var startStreamBtn = document.querySelector("#startStreamBtn");
 
-navigator.mediaDevices.getUserMedia({
-  audio: false,
-  video: true
-})
-.then(gotStream)
-.catch(function(e) {
-  alert('getUserMedia() error: ' + e.name);
-});
+startStreamBtn.onclick=function(e){
+sendMessage('got user media');
+}
+
+
+
 
 function gotStream(stream) {
   console.log('Adding local stream.');
@@ -133,9 +144,10 @@ if (location.hostname !== 'localhost') {
 
 function maybeStart() {
   console.log('>>>>>>> maybeStart() ', isStarted, localStream, isChannelReady);
-  if (!isStarted && typeof localStream !== 'undefined' && isChannelReady) {
+  if (!isStarted && isChannelReady) {
     console.log('>>>>>> creating peer connection');
     createPeerConnection();
+    if (isInitiator)
     pc.addStream(localStream);
     isStarted = true;
     console.log('isInitiator', isInitiator);
@@ -155,8 +167,11 @@ function createPeerConnection() {
   try {
     pc = new RTCPeerConnection(null);
     pc.onicecandidate = handleIceCandidate;
-    pc.onaddstream = handleRemoteStreamAdded;
+
+          pc.onaddstream = handleRemoteStreamAdded;
     pc.onremovestream = handleRemoteStreamRemoved;
+    
+
     console.log('Created RTCPeerConnnection');
   } catch (e) {
     console.log('Failed to create PeerConnection, exception: ' + e.message);
