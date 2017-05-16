@@ -1,4 +1,6 @@
 {{{title}}} {{{type}}}
+
+
 <div class="container">
  <div class="row">
 <button id="startStreamBtn" class="btn btn-default btn-success">Start stream</button>
@@ -25,7 +27,15 @@
   </div>
   <div class="row">
     <div class="col-sm-6">
-      <video autoplay></video>
+      <video id="localvideo" autoplay style="width:640px;height:480px"></video>
+    </div>
+    <div class="col-sm-6">
+   	<canvas></canvas>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <video id="remotevideo" autoplay style="width:640px;height:480px"></video>
     </div>
     <div class="col-sm-6">
    	<canvas></canvas>
@@ -37,4 +47,4 @@
 
 
 
-<script src="js/main.js"></script>
+<script src="js/main2.js"></script>

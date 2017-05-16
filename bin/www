@@ -25,13 +25,96 @@ var server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
-var isServer=true;
+
+var isServer = true;
+var clients = [];
+
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 var io = require('socket.io')(server);
 io.on('connection', function (socket) {
-   fs.readFile(__dirname+'/images/image1.png', function(err, buffer){
+
+
+
+if(clients.length==0)
+{
+  socket.emit("isServer",true);	
+}else{
+ socket.emit("isServer",false);	
+}
+
+clients.push(socket);
+
+
+
+// convenience function to log server messages on the client
+  function log() {
+    var array = ['Message from server:'];
+    array.push.apply(array, arguments);
+    socket.emit('log', array);
+  }
+
+  socket.on('message', function(message) {
+    log('Client said: ', message);
+    // for a real app, would be room-only (not broadcast)
+    socket.broadcast.emit('message', message);
+  });
+
+  socket.on('create or join', function(room) {
+    log('Received request to create or join room ' + room);
+
+    var numClients = clients.length;
+    log('Room ' + room + ' now has ' + numClients + ' client(s)');
+
+    if (numClients === 1) {
+      socket.join(room);
+      log('Client ID ' + socket.id + ' created room ' + room);
+      socket.emit('created', room, socket.id);
+
+    } else if (numClients === 2) {
+      log('Client ID ' + socket.id + ' joined room ' + room);
+      io.sockets.in(room).emit('join', room);
+      socket.join(room);
+      socket.emit('joined', room, socket.id);
+      io.sockets.in(room).emit('ready');
+    } else { // max two clients
+      socket.emit('full', room);
+    }
+  });
+
+  socket.on('ipaddr', function() {
+    var ifaces = os.networkInterfaces();
+    for (var dev in ifaces) {
+      ifaces[dev].forEach(function(details) {
+        if (details.family === 'IPv4' && details.address !== '127.0.0.1') {
+          socket.emit('ipaddr', details.address);
+        }
+      });
+    }
+  });
+
+  socket.on('bye', function(){
+    clients.pop(socket);
+    console.log('received bye');
+  });
+	
+ socket.on('disconnect', function() {
+      console.log('Got disconnect!');
+
+      var i = clients.indexOf(socket);
+      clients.splice(i, 1);
+   });
+
+socket.on('sendImage',function(data){
+fs.writeFile('myFile.png', data, function(err) {
+    if(err)
+	console.log(err);
+  });
+});
+
+
+fs.readFile(__dirname+'/images/image1.png', function(err, buffer){
 	if(err)
 	{ 
 		console.log(err);
@@ -39,18 +122,6 @@ io.on('connection', function (socket) {
 	}
         socket.emit('image', { buffer: buffer });
     });
-  socket.emit('isServer',isServer);
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-	isServer=false;
-    console.log(data);
-  });
-socket.on('sendImage',function(data){
-fs.writeFile('myFile.png', data, function(err) {
-    if(err)
-	console.log(err);
-  });
-});
 });
 /**
  * Normalize a port into a number, string, or false.

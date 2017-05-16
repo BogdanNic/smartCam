@@ -28,15 +28,18 @@ function successCallback(stream){
     mediaRecorder.ondataavailable = function(e) {
       chunks.push(e.data);
     }
-    window.stream = stream;
+     window.stream = stream;
     if (window.URL)
     {
         video.src = window.URL.createObjectURL(stream);
-    } 
+    	// video.src=stream;
+	} 
     else
     {
         video.src = stream;
     }
+     //video.src = stream;
+     video.play();
 }
 function errorCallback(error)
 {
