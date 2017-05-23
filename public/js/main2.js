@@ -123,6 +123,7 @@ sendMessage('got user media');
 function gotStream(stream) {
   console.log('Adding local stream.');
   localVideo.src = window.URL.createObjectURL(stream);
+  mediaRecorder= new MediaRecorder(stream);
   localStream = stream;
   sendMessage('got user media');
   if (isInitiator) {
