@@ -161,6 +161,68 @@ window.onbeforeunload = function() {
   sendMessage('bye');
 };
 
+///////////////////////////// Recording Stream
+var mediaRecorder;
+var recordedBlobs = [];
+var chunks = [];
+
+
+var  recordButton = document.getElementById("startRecordingBtn");
+recordButton.addEventListener('click', startRecording, false);
+var  downloadRecordingBtn = document.getElementById("downloadRecordingBtn");
+downloadRecordingBtn.addEventListener('click', download, false);
+
+function startRecording() {
+  mediaRecorder.start(30);
+  socket.emit("video-start");
+  mediaRecorder.ondataavailable =handleDataAvailable;
+      console.log(mediaRecorder.state);
+      console.log("recorder started");
+}
+
+function handleDataAvailable(event) {
+  if (event.data.size > 0) {
+    chunks.push(event.data);
+    socket.emit("video",event.data);
+  }
+}
+function stopRecording() {
+      mediaRecorder.stop();
+      socket.emit('video-end');
+      console.log(mediaRecorder.state);
+      console.log("recorder stopped");
+      //record.style.background = "";
+      //record.style.color = "";
+}
+function download() {
+  //stopRecording();
+   mediaRecorder.stop(); 
+      socket.emit('video-end');
+      console.log(mediaRecorder.state);
+      console.log("recorder stopped");
+   
+      console.log(mediaRecorder.state);
+      console.log("recorder stopped");
+ 
+      console.log("recorder stopped"+chunks.length);
+ 
+  
+  var blob = new Blob(chunks, {type: 'video/webm'});
+  var url = window.URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = 'test.webm';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function() {
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }, 100);
+}
+
+
+
 /////////////////////////////////////////////////////////
 
 function createPeerConnection() {

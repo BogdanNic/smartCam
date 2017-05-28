@@ -99,6 +99,22 @@ clients.push(socket);
     console.log('received bye');
   });
 	
+  var videoStream;
+  
+  socket.on('video-start', function(){
+    console.log('video-start');
+    videoStream = fs.createWriteStream('video.webm');
+    //videoStream.write(chunk);
+  });
+  socket.on('video', function(chunk){
+    console.log('data');
+    videoStream.write(chunk);
+  });  
+  socket.on('video-end', function(){
+    console.log('video-end');
+    videoStream.end();
+  });
+
  socket.on('disconnect', function() {
       console.log('Got disconnect!');
 
