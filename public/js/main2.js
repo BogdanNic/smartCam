@@ -17,7 +17,7 @@ var pcConfig = {
 
 // Set up audio and video regardless of what devices are present.
 var sdpConstraints = {
-  offerToReceiveAudio: true,
+  offerToReceiveAudio: false,
   offerToReceiveVideo: true
 };
 
@@ -29,81 +29,61 @@ var room = 'foo';
 
 var socket = io.connect();
 
-if (room !== '') {
-  socket.emit('create or join', room);
-  console.log('Attempted to create or  join room', room);
-}
 
-socket.on('created', function(room) {
-  console.log('Created room ' + room);
-  isInitiator = true;
-});
-
-socket.on('full', function(room) {
-  console.log('Room ' + room + ' is full');
-});
-
-socket.on('join', function (room){
-  console.log('Another peer made a request to join room ' + room);
-  console.log('This peer is the initiator of room ' + room + '!');
-  isChannelReady = true;
-});
-
-socket.on('joined', function(room) {
-  console.log('joined: ' + room);
-  isChannelReady = true;
-});
-
-socket.on('log', function(array) {
-  console.log.apply(console, array);
-});
 
 socket.on('isServer',function(data){
     isServer=data;
     input.value=isServer;
     if (isServer)
     {
-          navigator.mediaDevices.getUserMedia({
-  audio: false,
-  video: true
-})
-.then(gotStream)
-.catch(function(e) {
-  alert('getUserMedia() error: ' + e.name);
-});
+          
     }
 
 });
 
-////////////////////////////////////////////////
 
-function sendMessage(message) {
-  console.log('Client sending message: ', message);
-  socket.emit('message', message);
-}
+socket.on("users connected", function (data) {
+    console.log("user conneced", data);
+    clearConnectList();
+    document.getElementById("remotes").re
+    data.forEach(function (user) {
+        createLabelledButton(user);
+    }, this);
+});
 
-// This client receives a message
-socket.on('message', function(message) {
-  console.log('Client received message:', message);
-  if (message === 'got user media') {
-    maybeStart();
-  } else if (message.type === 'offer') {
-    if (!isInitiator && !isStarted) {
-      maybeStart();
+socket.on('teste', function (message) {
+    console.log(message);
+});
+
+socket.on('remote user', function (user) {
+    remoteUser = user;
+    console.log("remote user", user);
+});
+
+//bug in socket.io TODO: Fixit
+var setRemote=false;//for receiveing data 
+
+socket.on("messageRTC", function (message) {
+  //console.log("message arrived ", message.type);
+  delete message.id;
+   switch (message.type) {
+        case "offer": 
+                    pc.setRemoteDescription(message)
+                    .then( () =>pc.createAnswer())
+                    .then( (answer) =>  pc.setLocalDescription(answer))
+                    .then( () => send(pc.localDescription))  
+                    .catch(logError);
+                    break;
+        case "answer": 
+                      if (!setRemote) //not revceive twice data
+                      pc.setRemoteDescription(message).catch((e) => console.log(error));
+                      setRemote = true;
+                      break;
+        case "candidate": 
+                        pc.addIceCandidate(message.candidate).catch(logError);
+                        break;
+       default: console.log("a error with transmition of sdp",message);
     }
-    pc.setRemoteDescription(new RTCSessionDescription(message));
-    doAnswer();
-  } else if (message.type === 'answer' && isStarted) {
-    pc.setRemoteDescription(new RTCSessionDescription(message));
-  } else if (message.type === 'candidate' && isStarted) {
-    var candidate = new RTCIceCandidate({
-      sdpMLineIndex: message.label,
-      candidate: message.candidate
-    });
-    pc.addIceCandidate(candidate);
-  } else if (message === 'bye' && isStarted) {
-    handleRemoteHangup();
-  }
 });
 
 ////////////////////////////////////////////////////
@@ -113,29 +93,76 @@ var remoteVideo = document.querySelector('#remotevideo');
 var input = document.querySelector("#inputServer");
 var startStreamBtn = document.querySelector("#startStreamBtn");
 
-startStreamBtn.onclick=function(e){
-sendMessage('got user media');
+var connectButton = document.getElementById("connectBtn");
+connectButton.addEventListener('click', connect, false);
+
+var loginButton = document.getElementById("loginBtn");
+loginButton.addEventListener('click', login, false);
+var loginInput = document.getElementById("loginInput");
+
+var currentUser,remoteUser;
+
+function connect(){
+  alert("connect");
+}
+function login(){
+  name = loginInput.value;
+
+    if (name.length > 0) {
+        currentUser = { name: name, id: socket.id };
+        socket.emit("login", currentUser);
+        createPeerConnection();
+    }
 }
 
+function createLabelledButton(user) {
+    var button = document.createElement("button");
+    var id = user.id;
+    button.onclick = function (user) {
+        return function () {
+            performCall(user);
+        };
+    }(user);
 
+    button.appendChild(document.createTextNode(user.name));
+    document.getElementById("remotes").appendChild(button);
+    return button;
+}
+function clearConnectList() {
+    var otherClientDiv = document.getElementById("remotes");
+    while (otherClientDiv.hasChildNodes()) {
+        otherClientDiv.removeChild(otherClientDiv.lastChild);
+    }
+}
+function logError(error) {
+    console.log(error.name + ": " + error.message);
+}
+
+function performCall(user) {
+    socket.emit('call user', user.id);
+    remoteUser = user;
+    pc.addStream(localStream);
+    createOffer();
+}
+startStreamBtn.onclick=function(e){
+  alert('start stream');
+}
+
+function getCamera(){
+  navigator.mediaDevices.getUserMedia({ audio: false, video: true})
+  .then(gotStream)
+  .catch( e => alert('getUserMedia() error: ' + e.name));
+}
 
 
 function gotStream(stream) {
   console.log('Adding local stream.');
   localVideo.src = window.URL.createObjectURL(stream);
-  mediaRecorder= new MediaRecorder(stream);
+  mediaRecorder = new MediaRecorder(stream);
   localStream = stream;
-  sendMessage('got user media');
-  if (isInitiator) {
-    maybeStart();
-  }
+  
 }
 
-var constraints = {
-  video: true
-};
-
-console.log('Getting user media with constraints', constraints);
 
 if (location.hostname !== 'localhost') {
   requestTurn(
@@ -143,20 +170,7 @@ if (location.hostname !== 'localhost') {
   );
 }
 
-function maybeStart() {
-  console.log('>>>>>>> maybeStart() ', isStarted, localStream, isChannelReady);
-  if (!isStarted && isChannelReady) {
-    console.log('>>>>>> creating peer connection');
-    createPeerConnection();
-    if (isInitiator)
-    pc.addStream(localStream);
-    isStarted = true;
-    console.log('isInitiator', isInitiator);
-    if (isInitiator) {
-      doCall();
-    }
-  }
-}
+
 
 window.onbeforeunload = function() {
   sendMessage('bye');
@@ -201,9 +215,6 @@ function download() {
       socket.emit('video-end');
       console.log(mediaRecorder.state);
       console.log("recorder stopped");
-   
-      console.log(mediaRecorder.state);
-      console.log("recorder stopped");
  
       console.log("recorder stopped"+chunks.length);
  
@@ -230,28 +241,35 @@ function createPeerConnection() {
   try {
     pc = new RTCPeerConnection(null);
     pc.onicecandidate = handleIceCandidate;
-
-          pc.onaddstream = handleRemoteStreamAdded;
+    pc.onaddstream = handleRemoteStreamAdded;
     pc.onremovestream = handleRemoteStreamRemoved;
     
-
     console.log('Created RTCPeerConnnection');
+   getCamera();
   } catch (e) {
     console.log('Failed to create PeerConnection, exception: ' + e.message);
     alert('Cannot create RTCPeerConnection object.');
     return;
   }
 }
+function createOffer() {
+    trace('createOffer start');
+    pc.createOffer(sdpConstraints).then(
+        onCreateOfferSuccess,
+        onCreateSessionDescriptionError
+        );
+}
+function onCreateOfferSuccess(desc) {
+    trace('setLocalDescription start');
+    pc.setLocalDescription(desc).then(
+        () => { send(desc); }
+    )
 
+}
 function handleIceCandidate(event) {
   console.log('icecandidate event: ', event);
   if (event.candidate) {
-    sendMessage({
-      type: 'candidate',
-      label: event.candidate.sdpMLineIndex,
-      id: event.candidate.sdpMid,
-      candidate: event.candidate.candidate
-    });
+     send({ type: "candidate", candidate: event.candidate });
   } else {
     console.log('End of candidates.');
   }
@@ -271,25 +289,41 @@ function doCall() {
   console.log('Sending offer to peer');
   pc.createOffer(setLocalAndSendMessage, handleCreateOfferError);
 }
-
-function doAnswer() {
-  console.log('Sending answer to peer.');
-  pc.createAnswer().then(
-    setLocalAndSendMessage,
-    onCreateSessionDescriptionError
-  );
-}
-
-function setLocalAndSendMessage(sessionDescription) {
-  // Set Opus as the preferred codec in SDP if Opus is present.
-  //  sessionDescription.sdp = preferOpus(sessionDescription.sdp);
-  pc.setLocalDescription(sessionDescription);
-  console.log('setLocalAndSendMessage sending message', sessionDescription);
-  sendMessage(sessionDescription);
-}
-
 function onCreateSessionDescriptionError(error) {
   trace('Failed to create session description: ' + error.toString());
+}
+
+function send(data) {
+    console.log("sending", data.type);
+    if (!remoteUser) {
+        console.log(remoteUser, "user is not difinede function send");
+        return;
+    }
+   // data.id = remoteUser.id;
+
+    if (data.type === "offer") {
+        data = {
+            type: data.type,
+            sdp: data.sdp,
+            id: remoteUser.id
+        }
+
+    }
+    if (data.type === "candidate") {
+        data = {
+            type: data.type,
+            candidate: data.candidate,
+            id: remoteUser.id
+        }
+    }
+    if (data.type === "answer") {
+        data = {
+            type: data.type,
+            sdp: data.sdp,
+            id: remoteUser.id
+        }
+    }
+    socket.emit('messageRTC', data);
 }
 
 function requestTurn(turnURL) {
@@ -349,6 +383,17 @@ function stop() {
   // isVideoMuted = false;
   pc.close();
   pc = null;
+}
+function trace(text) {
+    if (text[text.length - 1] === '\n') {
+        text = text.substring(0, text.length - 1);
+    }
+    if (window.performance) {
+        var now = (window.performance.now() / 1000).toFixed(3);
+        console.log(now + ': ' + text);
+    } else {
+        console.log(text);
+    }
 }
 
 ///////////////////////////////////////////

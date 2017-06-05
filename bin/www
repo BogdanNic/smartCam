@@ -28,6 +28,7 @@ var server = http.createServer(app);
 
 var isServer = true;
 var clients = [];
+var users = [];
 
 server.listen(port);
 server.on('error', onError);
@@ -61,6 +62,39 @@ clients.push(socket);
     socket.broadcast.emit('message', message);
   });
 
+ socket.on('login', function (user) {
+        //user.socket = socket;
+        console.log(user);
+        var userIndex = users.findIndex(u => u.id === user.id || u.name === user.name);
+        if (userIndex === -1) {
+            users.push(user);
+        }
+
+        socket.emit("users connected", users);
+        //socket.broadcast.to(user.id).emit('users connected',users);
+    })
+    
+    socket.on('call user', function (userId) {
+        console.log("asdsa");
+        var user = users.find(u=>u.id === userId);
+        if (user){
+            console.log("user faund",user);
+            socket.broadcast.to(userId).emit('remote user', user);
+        }
+        
+    });
+    
+    socket.on('messageRTC', function (message) {
+      console.log('messag',message);
+      if (message.type !== 'answer'){
+        socket.broadcast.to(message.id).emit('messageRTC', message);
+      }
+      else { 
+          socket.broadcast.emit('messageRTC', message);
+      }
+                
+        //socket.broadcast.to(message.id).emit('messageRTC', message);
+    });
   socket.on('create or join', function(room) {
     log('Received request to create or join room ' + room);
 
@@ -117,9 +151,18 @@ clients.push(socket);
 
  socket.on('disconnect', function() {
       console.log('Got disconnect!');
+      var deleteIndex = -1;
+      users.forEach(function (user) {
+        if (user.id === socket.id) {
+          deleteIndex = users.indexOf(user);
+        }
+      }, this);
 
-      var i = clients.indexOf(socket);
-      clients.splice(i, 1);
+      if (deleteIndex > -1) {
+        users.splice(deleteIndex, 1);
+      }
+
+      socket.broadcast.emit("users connected", users);
    });
 
 socket.on('sendImage',function(data){
