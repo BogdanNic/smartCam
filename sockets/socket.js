@@ -1,40 +1,7 @@
-#!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
-
-var app = require('../app');
-var fs=require('fs');
-var debug = require('debug')('project:server');
-var http = require('http');
-
-/**
- * Get port from environment and store in Express.
- */
-
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
-
-/**
- * Create HTTP server.
- */
-
-var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-var isServer = true;
+module.exports=function(io,fs,path){
 var clients = [];
 var users = [];
-
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
-var io = require('socket.io')(server);
-io.on('connection', function (socket) {
+ io.on('connection', function (socket) {
 
 
 
@@ -137,7 +104,9 @@ clients.push(socket);
   
   socket.on('video-start', function(){
     console.log('video-start');
-    videoStream = fs.createWriteStream('video.webm');
+    var location = path.join(__dirname,'..','recordings','video.webm');
+fs.writeFile(location,'record',e=>console.log(e));
+    videoStream = fs.createWriteStream(location);
     //videoStream.write(chunk);
   });
   socket.on('video', function(chunk){
@@ -146,7 +115,8 @@ clients.push(socket);
   });  
   socket.on('video-end', function(){
     console.log('video-end');
-    videoStream.end();
+    setTimeout(s=>videoStream.end(),200);
+    //videoStream.end();
   });
 
  socket.on('disconnect', function() {
@@ -166,14 +136,15 @@ clients.push(socket);
    });
 
 socket.on('sendImage',function(data){
-fs.writeFile('myFile.png', data, function(err) {
+  
+var buf = Buffer.from(data, 'base64'); // Ta-da
+fs.writeFile('myFile.png', buf, function(err) {
     if(err)
 	console.log(err);
   });
+  //console.log(data);
 });
-
-
-fs.readFile(__dirname+'/images/image1.png', function(err, buffer){
+fs.readFile(__dirname+'/../bin/images/image1.png', function(err, buffer){
 	if(err)
 	{ 
 		console.log(err);
@@ -182,62 +153,4 @@ fs.readFile(__dirname+'/images/image1.png', function(err, buffer){
         socket.emit('image', { buffer: buffer });
     });
 });
-/**
- * Normalize a port into a number, string, or false.
- */
-
-function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-}
-
-/**
- * Event listener for HTTP server "error" event.
- */
-
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
-}
-
-/**
- * Event listener for HTTP server "listening" event.
- */
-
-function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
 }
