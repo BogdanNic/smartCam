@@ -3,28 +3,26 @@ var router = express.Router();
 const fs = require('fs');
 const path =require('path');
 const location = path.join(__dirname,'..','recordings');
+var recordCtrl = require('../controllers/recordController');
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('/phone', function(req, res, next) {
-  res.render('phone', { title: 'Phone' ,type:'WebRtc' });
+router.get('/recents', function(req, res, next) {
+  res.render('recents', { title: 'recente' ,type:'WebRtc' });
 });
-router.get('/history', function(req, res, next) {
-  var people=[];
-  
-//console.log(location);
-fs.readdir(location, (err, files) => {
-  if (!err)
-  files.forEach(file => {
-    if (!file.isDir)
-    console.log(file);
+
+router.get('/live', function(req, res, next) {
+  res.render('live', { title: 'Live' ,type:'WebRtc' });
+});
+router.get('/streaming', function(req, res, next) {
+  res.render('streaming', { title: 'Live' ,type:'WebRtc' });
+});
+
+router.get('/arhive', function(req, res, next) {
+  recordCtrl.get(function (arr) {
+    res.render('arhive', { title: 'Arhive' ,type:'Date', records:arr});
   });
-  //console.log(files);
-});
-people.push({firstname:'bogdan'},{lastname:'nic'});
-people.push({firstname:'vb2'},{lastname:'nic2'});
-  res.render('history', { title: 'History' ,type:'Date', people:people});
 });
 module.exports = router;

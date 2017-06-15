@@ -1,6 +1,16 @@
+var User =require ('../models/userSchema');
+var Record = require('../models/recordSchema');
+var recordCtrl = require('../controllers/recordController');
+var userCtrl = require('../controllers/userController');
+var uuid=require("node-uuid");
 module.exports=function(io,fs,path){
 var clients = [];
 var users = [];
+var tempName;
+var tempSize = 0;
+var tempUser ;
+var tempTime;
+var startTime;
  io.on('connection', function (socket) {
 
 
@@ -34,12 +44,25 @@ clients.push(socket);
         console.log(user);
         var userIndex = users.findIndex(u => u.id === user.id || u.name === user.name);
         if (userIndex === -1) {
+          
+       var dd =  userCtrl.login({name:user.name,email:user.id},function(u){
+           
+            if(u){
+              console.log('has user',u);
+               user._id=u._id;
             users.push(user);
-        }
+            tempUser= u;
+            console.log(users);
+            }
+       });
+       
+      }
 
         socket.emit("users connected", users);
         //socket.broadcast.to(user.id).emit('users connected',users);
-    })
+    
+
+})
     
     socket.on('call user', function (userId) {
         console.log("asdsa");
@@ -104,20 +127,54 @@ clients.push(socket);
   
   socket.on('video-start', function(){
     console.log('video-start');
-    var location = path.join(__dirname,'..','recordings','video.webm');
-fs.writeFile(location,'record',e=>console.log(e));
-    videoStream = fs.createWriteStream(location);
+    tempName =path.join(__dirname,'..','recordings',uuid.v1()+'.webm'); 
+    //var location = path.join(__dirname,'..','recordings',nameTemp+'.webm');
+//fs.writeFile(location,'record',e=>console.log(e));
+    startTime=new Date().getTime();
+    console.log(startTime);
+    videoStream = fs.createWriteStream(tempName);
     //videoStream.write(chunk);
+    videoStream.on('finish',function(){
+    fs.stat(tempName,function(err,stats){
+      var duration = new Date().getTime()-startTime;
+      // console.log(duration);
+      // console.log("on end stats");
+      // console.log(stats['size']);
+      // console.log(stats['ctime']);
+      recordCtrl.insert(tempUser,tempName, stats['size'],duration,stats['ctime'],e=>console.log(e));
+    });
+});
   });
   socket.on('video', function(chunk){
     console.log('data');
+    tempSize += chunk.length;
     videoStream.write(chunk);
   });  
   socket.on('video-end', function(){
     console.log('video-end');
-    setTimeout(s=>videoStream.end(),200);
+    setTimeout(function(){
+      videoStream.end();
+     console.log(tempSize);
+
+     //recordCtrl.insert(tempName,tempSize,tempUser);
+    // tempSize=0;
+     //tempName=null;
+    // fs.stat(tempName,function(stats){
+    //   console.log(stats['size']);
+    //   console.log(stats['ctime']);
+    // });
+  },500);
     //videoStream.end();
   });
+   tempDir =path.join(__dirname,'..','recordings'); 
+// fs.watch(tempDir, function (event, filename) {
+//     console.log('event is: ' + event);
+//     if (filename) {
+//         console.log('filename provided: ' + filename);
+//     } else {
+//         console.log('filename not provided');
+//     }
+// });
 
  socket.on('disconnect', function() {
       console.log('Got disconnect!');
