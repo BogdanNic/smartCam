@@ -8,8 +8,8 @@
     <div class="card">
         <h3 class="card-header">{{_id.month}}  </h3> 
         <div class="card-block">
-            <h4 class="card-title">Special title treatment</h4>
-            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            <h4 class="card-title"> Infomatie</h4>
+            <p class="card-text">Stocare pe disk:  {{sizeTotal}}</p>
             <a href="#" class="btn btn-primary">Go somewhere</a>
         </div>
         <div class="row">
@@ -17,14 +17,20 @@
              <div class="col-sm-6 col-md-4 col-lg-3 mt-4">
                 {{#each record}}
                  <div class="card">
-                        <img class="card-img-top" src="http://success-at-work.com/wp-content/uploads/2015/04/free-stock-photos.gif">
+                        <video class="card-img-top" src="{{location}}" controls></video>
                         <div class="card-block">
-                                <h5 class="text-bold">{{createdAt}} </h5>
+                                <h6 class="text-bold">{{createdAt}} </h6>
+                                <h6 class="text-bold">{{duration}} </h6> 
+                                 <h6 class="text-bold">{{size}} </h6> 
                         </div>
                  </div>
+                 
                 {{/each}}
+                 
             </div>
             {{/each}}
+
+            
         </div>
     </div>
 

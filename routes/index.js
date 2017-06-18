@@ -10,8 +10,10 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/recents', function(req, res, next) {
-  res.render('recents', { title: 'recente' ,type:'WebRtc' });
-});
+  recordCtrl.getRecents(function(recents){
+    res.render('recents', { title: 'recente' ,type:'WebRtc' ,records:recents});
+  });
+}); 
 
 router.get('/live', function(req, res, next) {
   res.render('live', { title: 'Live' ,type:'WebRtc' });

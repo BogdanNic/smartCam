@@ -2,11 +2,11 @@
 var Record = require('../models/recordSchema');
 var moment = require('moment');
 
-function insert(user, name, size, duration, createAt, callback){
+function insert(user, location, size, duration, createAt, callback){
 
 
 
-var record =new Record({user:user._id, record_id:name, duration:duration, size:size, createAt:createAt});
+var record =new Record({user:user._id, location:location, duration:duration, size:size, createAt:createAt});
  record.save(e=>console.log(e));
  console.log(record);
 
@@ -15,12 +15,22 @@ var record =new Record({user:user._id, record_id:name, duration:duration, size:s
 }
 
 
+function getRecents(callback)
+{
+  Record.find().sort({'createAt':-1}).limit(10).exec(function(err,recents){
+      //console.log(recents);
+      if (!err){
+        callback(recents);
+      }
+  })
+}
+
 function get(callback)
 {
   moment.locale('ro');
     Record.collection.aggregate([
     {
-        $project: {year:{ "$year": "$createdAt"},"createdAt":1,"size":1, "month":{"$month": "$createdAt" },"iamge":"s"}
+        $project: {year:{ "$year": "$createdAt"},"createdAt":1,"size":1, "month":{"$month": "$createdAt" },"location":1,"duration":1}
     }
     ,{
        "$group": 
@@ -64,13 +74,19 @@ function get(callback)
           myM.forEach(function (el) {
             el._id.month = monthsName[el._id.month];
             if (el.records) {
+                var sizeTotal=0; 
                 var recordSS = el.records;
                 recordSS.forEach(function (item) {
                 var recordSS2 = item.record;
                 recordSS2.forEach(function (item2) {
-                    item2.createdAt = moment(item2.createdAt).fromNow(true);
+                    item2.createdAt = moment(item2.createdAt).fromNow(false);
+                    duration = moment.duration(item2.duration);
+                    item2.duration =duration.hours()+":"+ duration.seconds()+":"+ duration.milliseconds(); 
+                    sizeTotal+=item2.size;
                 }, this);
-              }, this);
+                console.log(sizeTotal);
+              el.sizeTotal = sizeTotal;
+            }, this);
             }
           }, this)
       }, this);
@@ -84,5 +100,6 @@ function get(callback)
 module.exports={
     insert:insert,
     get:get,
+    getRecents:getRecents
    
 };

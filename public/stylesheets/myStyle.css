@@ -112,3 +112,9 @@ h5 {
 .meta a:hover {
     color: rgba(0, 0, 0, .87);
 }
+.btn-primary{
+    width: 140px;
+    margin: 2px;
+    background-color: #3F51B5;
+    border-color:#3F51B5;
+}

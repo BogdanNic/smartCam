@@ -1,44 +1,30 @@
-{{{title}}} {{{type}}}
-
-
 <div class="container">
-  <div class="row">
-    <button id="connectBtn" class="btn btn-default btn-success">Connect</button>
+  <div class="row hidden-sm-down">
+    <button id="connectBtn" class="btn btn-default btn-primary">Connect</button>
     <input type="text" id="loginInput"/>
-    <button id="loginBtn" class="btn btn-default btn-success">Login</button>
-  <div id="remotes"></div>
-  
+    <button id="loginBtn" class="btn btn-default btn-primary">Login</button>
+  <div id="remotes hidden-sm-down"></div>
   </div>
   <div class="row">
-    <button id="startStreamBtn" class="btn btn-default btn-success">Start stream</button>
-    <button id="stopStreamBtn" class="btn btn-default btn-success">Stop stream</button>
+    <button id="startStreamBtn" class="btn btn-default btn-primary">Direct</button>
+    <button id="stopStreamBtn" class="btn btn-default btn-primary">Stop Direct</button>
   </div>
   <div class="row">
-    <button id="takePictureBtn" class="btn btn-default btn-success">Take snapshot</button>
-
-    <a id="downloadBtn" download="Canvas.png" class="btn btn-default btn-info" href="#">Save snapshot</a>
-
+    <button id="takePictureBtn" class="btn btn-default btn-primary">Poza acum</button>
+    <a id="downloadBtn" download="Canvas.png" class="btn btn-primary" href="#">Salveaza poza</a>
   </div>
-  <div class="row">
-    <button id="serverBtn" class="btn btn-default btn-success">SetServer</button>
+  <div class="row hidden-sm-down" >
+    <button id="serverBtn" class="btn btn-default btn-primary">SetServer</button>
     <input id="inputServer" type="text" />
   </div>
   <div class="row">
-    <div class="col">
-      <button id="startRecordingBtn" class="btn btn-default btn-success">Start recording</button>
-
-      <a id="downloadRecordingBtn" download="Canvas.webm" class="btn btn-default btn-success" href="#">Download recording</a>
+      <button id="startRecordingBtn" class="btn btn-default btn-primary">Inregistreaza</button>
+      <button id="downloadRecordingBtn" download="Canvas.webm" class="btn btn-default btn-primary">Stop inregistrare</a>
     </div>
-    <div class="col">
-    </div>
-  </div>
   <div class="row">
-    <div class="col-sm-6">
-      <video id="localvideo" autoplay style="width:640px;height:480px"></video>
-    </div>
-    <div class="col-sm-6">
+      {{!--<video id="localvideo" autoplay style="width:640px;height:480px"></video>--}}
+       <video id="localvideo" autoplay style="width:340px;height:280px"></video>
       <canvas></canvas>
-    </div>
   </div>
   <div class="row">
     <div class="col-sm-6">

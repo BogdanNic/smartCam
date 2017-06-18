@@ -22,10 +22,12 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.static(path.join(__dirname, "/public")));
+// app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(path.join(__dirname, 'recordings'))); 
+app.use("/recordings",express.static(path.join(__dirname, "/recordings")));
 app.use('/', index);
-app.use('/users', users);
+app.use('/users', users);  
 var db ={};
 var url=process.env.MONGODB_URI;
 
@@ -45,9 +47,6 @@ db.once('open', function() {
 var User =require ('./models/userSchema');
 var Record = require('./models/recordSchema');
 
-Record.find().sort({'createAt':-1}).exec(function(err,recents){
-    console.log(recents);
-  })
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

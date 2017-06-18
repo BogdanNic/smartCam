@@ -6,8 +6,6 @@ var uuid=require("node-uuid");
 module.exports=function(io,fs,path){
 var clients = [];
 var users = [];
-var tempName;
-var tempSize = 0;
 var tempUser ;
 var tempTime;
 var startTime;
@@ -127,54 +125,31 @@ clients.push(socket);
   
   socket.on('video-start', function(){
     console.log('video-start');
-    tempName =path.join(__dirname,'..','recordings',uuid.v1()+'.webm'); 
-    //var location = path.join(__dirname,'..','recordings',nameTemp+'.webm');
-//fs.writeFile(location,'record',e=>console.log(e));
+   // tempName =path.join(__dirname,'..','recordings',uuid.v1()+'.webm'); 
+    var tempName =path.join('./','recordings',uuid.v1()+'.webm');  
     startTime=new Date().getTime();
     console.log(startTime);
     videoStream = fs.createWriteStream(tempName);
-    //videoStream.write(chunk);
     videoStream.on('finish',function(){
     fs.stat(tempName,function(err,stats){
       var duration = new Date().getTime()-startTime;
-      // console.log(duration);
-      // console.log("on end stats");
-      // console.log(stats['size']);
-      // console.log(stats['ctime']);
       recordCtrl.insert(tempUser,tempName, stats['size'],duration,stats['ctime'],e=>console.log(e));
     });
 });
   });
   socket.on('video', function(chunk){
-    console.log('data');
-    tempSize += chunk.length;
+    //console.log('data');
     videoStream.write(chunk);
   });  
   socket.on('video-end', function(){
-    console.log('video-end');
+    
+    //console.log('video-end');
+    
     setTimeout(function(){
       videoStream.end();
-     console.log(tempSize);
-
-     //recordCtrl.insert(tempName,tempSize,tempUser);
-    // tempSize=0;
-     //tempName=null;
-    // fs.stat(tempName,function(stats){
-    //   console.log(stats['size']);
-    //   console.log(stats['ctime']);
-    // });
-  },500);
-    //videoStream.end();
+    },500);
   });
-   tempDir =path.join(__dirname,'..','recordings'); 
-// fs.watch(tempDir, function (event, filename) {
-//     console.log('event is: ' + event);
-//     if (filename) {
-//         console.log('filename provided: ' + filename);
-//     } else {
-//         console.log('filename not provided');
-//     }
-// });
+
 
  socket.on('disconnect', function() {
       console.log('Got disconnect!');
