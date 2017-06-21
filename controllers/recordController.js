@@ -71,21 +71,24 @@ function get(callback)
         arr.forEach(function (element) {
         if (element.months)
           myM = element.months;
-          myM.forEach(function (el) {
-            el._id.month = monthsName[el._id.month];
-            if (el.records) {
-                var sizeTotal=0; 
-                var recordSS = el.records;
+          myM.forEach(function (recordingMonth) {
+            recordingMonth._id.month = monthsName[recordingMonth._id.month];
+            if (recordingMonth.records) {
+                var sizeTotal=0,count=0; 
+                var recordSS = recordingMonth.records;
                 recordSS.forEach(function (item) {
                 var recordSS2 = item.record;
-                recordSS2.forEach(function (item2) {
-                    item2.createdAt = moment(item2.createdAt).fromNow(false);
-                    duration = moment.duration(item2.duration);
-                    item2.duration =duration.hours()+":"+ duration.seconds()+":"+ duration.milliseconds(); 
-                    sizeTotal+=item2.size;
+                recordSS2.forEach(function (record) {
+                    record.createdAt = moment(record.createdAt).fromNow(false);
+                    duration = moment.duration(record.duration);
+                    record.duration =duration.hours()+":"+ duration.seconds()+":"+ duration.milliseconds(); 
+                    record.size =parseInt(record.size/1024);
+                    sizeTotal+=record.size;
+                    count++;
                 }, this);
                 console.log(sizeTotal);
-              el.sizeTotal = sizeTotal;
+              recordingMonth.sizeTotal = sizeTotal;
+              recordingMonth.count = count;
             }, this);
             }
           }, this)

@@ -8,9 +8,8 @@
     <div class="card">
         <h3 class="card-header">{{_id.month}}  </h3> 
         <div class="card-block">
-            <h4 class="card-title"> Infomatie</h4>
-            <p class="card-text">Stocare pe disk:  {{sizeTotal}}</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            <h5 class="card-text">Stocare pe disk:  {{sizeTotal}} KB</h5>
+            <h5 class="card-text">Numarul :  {{count}}</h5>
         </div>
         <div class="row">
              {{#each records}}
@@ -19,9 +18,10 @@
                  <div class="card">
                         <video class="card-img-top" src="{{location}}" controls></video>
                         <div class="card-block">
-                                <h6 class="text-bold">{{createdAt}} </h6>
-                                <h6 class="text-bold">{{duration}} </h6> 
-                                 <h6 class="text-bold">{{size}} </h6> 
+                            <h6 > Data : {{createdAt}} </h6>
+                            <h6 > Data :  {{duration}} </h6> 
+                            <h6 >Marimea : {{size}} KB </h6> 
+                            <button  class="btn btn-primary" >Sterge</button>
                         </div>
                  </div>
                  
