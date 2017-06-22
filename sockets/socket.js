@@ -55,7 +55,7 @@ clients.push(socket);
 		 });
 
 	 }
-
+	 users.push(user);
 	 io.emit("users connected", users);
 	 //socket.broadcast.to(user.id).emit('users connected',users);
 

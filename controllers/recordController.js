@@ -67,6 +67,7 @@ function get(callback)
       }
    
    ],function(err,arr){
+if(err) console.log(err);
      var monthsName= ['Ianuarie','Februrie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
         arr.forEach(function (element) {
         if (element.months)

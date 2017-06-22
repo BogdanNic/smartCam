@@ -47,13 +47,17 @@ db.once('open', function() {
 var User =require ('./models/userSchema');
 var Record = require('./models/recordSchema');
 
+
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
-
+//userCtrl.insert({name:"bog"},function(e){
+//	console.log(e);
+//});
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
