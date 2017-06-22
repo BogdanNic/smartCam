@@ -58,15 +58,6 @@ app.use(function(req, res, next) {
 //userCtrl.insert({name:"bog"},function(e){
 //	console.log(e);
 //});
-var ifaces = os.networkInterfaces();
-    for (var dev in ifaces) {
-      ifaces[dev].forEach(function(details) {
-        if (details.family === 'IPv4' && details.address !== '127.0.0.1') {
-          console.log('ipaddr', details.address);
-        }
-      });
-    }
-
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
