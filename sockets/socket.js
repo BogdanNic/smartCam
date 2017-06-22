@@ -120,6 +120,15 @@ clients.push(socket);
       });
     }
   });
+  
+   socket.on('start-recording',function(){
+		socket.broadcast.emit('server record-start');
+});
+   socket.on('stop-recording',function(){
+		socket.broadcast.emit('server record-stop');
+});
+
+
 
   socket.on('bye', function(){
     clients.pop(socket);

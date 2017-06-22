@@ -67,6 +67,13 @@ socket.on('remote user', function (user) {
     console.log("remote user", user);
 });
 
+socket.on('server record-start',function(){
+	startRecording();
+});
+socket.on('server record-stop',function(){
+	stopRecording();
+});
+
 //bug in socket.io TODO: Fixit
 var setRemote=false;//for receiveing data 
 
@@ -195,11 +202,17 @@ var  downloadRecordingBtn = document.getElementById("downloadRecordingBtn");
 downloadRecordingBtn.addEventListener('click', download, false);
 
 function startRecording() {
+  if (currentUser.name!=='server')
+{
+  socket.emit('start-recording');
+}else{
+
   mediaRecorder.start(30);
   socket.emit("video-start");
   mediaRecorder.ondataavailable =handleDataAvailable;
       console.log(mediaRecorder.state);
       console.log("recorder started");
+}
 }
 
 function handleDataAvailable(event) {
@@ -209,12 +222,17 @@ function handleDataAvailable(event) {
   }
 }
 function stopRecording() {
+  if (currentUser.name!=='server')
+{
+  socket.emit('stop-recording');
+}else{
       mediaRecorder.stop();
       socket.emit('video-end');
       console.log(mediaRecorder.state);
       console.log("recorder stopped");
       //record.style.background = "";
       //record.style.color = "";
+}
 }
 function download() {
   //stopRecording();
