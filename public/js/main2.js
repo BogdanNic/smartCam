@@ -407,7 +407,7 @@ function send(data) {
 function requestTurn(turnURL) {
   var turnExists = false;
   for (var i in pcConfig.iceServers) {
-    if (pcConfig.iceServers[i].url.substr(0, 5) === 'turn:') {
+    if (pcConfig.iceServers[i].urls.substr(0, 5) === 'turn:' ){
       turnExists = true;
       turnReady = true;
       break;

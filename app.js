@@ -56,7 +56,7 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
-//userCtrl.insert({name:"bog"},function(e){
+//userCtrl.insert({name:"server"},function(e){
 //	console.log(e);
 //});
 var ifaces = os.networkInterfaces();
