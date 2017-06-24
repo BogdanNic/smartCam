@@ -45,12 +45,19 @@ socket.on('isServer',function(data){
 socket.on("users connected", function (data) {
     console.log("user conneced", data);
     clearConnectList();
-    document.getElementById("remotes").re
     data.forEach(function (user) {
+        if(user.name==="server")
+        {
+            serverUser = user;
+        }
         createLabelledButton(user);
     }, this);
 });
 
+socket.on("receive Call",function (data) {
+
+   performCall(data);
+});
 socket.on('teste', function (message) {
     console.log(message);
 });
@@ -101,12 +108,12 @@ loginButton.addEventListener('click', login, false);
 var loginInput = document.getElementById("loginInput");
 
 var currentUser,remoteUser;
-
+var serverUser;
 function connect(){
   alert("connect");
 }
 function login(){
-  name = loginInput.value;
+ var name = loginInput.value;
 
     if (name.length > 0) {
         currentUser = { name: name, id: socket.id };
@@ -145,8 +152,8 @@ function performCall(user) {
     createOffer();
 }
 startStreamBtn.onclick=function(e){
-  alert('start stream');
-}
+    socket.emit("call Server",currentUser);
+};
 
 function getCamera(){
   navigator.mediaDevices.getUserMedia({ audio: false, video: true})

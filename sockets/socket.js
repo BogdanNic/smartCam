@@ -38,29 +38,30 @@ clients.push(socket);
   });
 
  socket.on('login', function (user) {
-        //user.socket = socket;
-        console.log(user);
-        var userIndex = users.findIndex(u => u.id === user.id || u.name === user.name);
-        if (userIndex === -1) {
-          
-       var dd =  userCtrl.login({name:user.name,email:user.id},function(u){
-           
-            if(u){
-              console.log('has user',u);
-               user._id=u._id;
-            users.push(user);
-            tempUser= u;
-            console.log(users);
-            }
-       });
-       
-      }
+	 //user.socket = socket;
+	 console.log(user);
+	 var userIndex = users.findIndex(u => u.id === user.id || u.name === user.name);
+	 if (userIndex === -1) {
 
-        socket.emit("users connected", users);
-        //socket.broadcast.to(user.id).emit('users connected',users);
-    
+		 var dd = userCtrl.login({name: user.name, email: user.id}, function (u) {
 
-})
+			 if (u) {
+				 console.log('has user', u);
+				 user._id = u._id;
+				 users.push(user);
+				 tempUser = u;
+				 console.log(users);
+			 }
+		 });
+
+	 }
+
+	 io.emit("users connected", users);
+	 //socket.broadcast.to(user.id).emit('users connected',users);
+
+ });
+
+
     
     socket.on('call user', function (userId) {
         console.log("asdsa");
@@ -71,7 +72,11 @@ clients.push(socket);
         }
         
     });
-    
+     socket.on("call Server",function(user){
+         console.log("call Server "+user.id);
+         // socket[user.id].emit("receive Call",user.name);
+         socket.broadcast.emit("receive Call",user);
+     });
     socket.on('messageRTC', function (message) {
       console.log('messag',message);
       if (message.type !== 'answer'){
