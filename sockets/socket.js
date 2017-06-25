@@ -9,16 +9,11 @@ var users = [];
 var tempUser ;
 var tempTime;
 var startTime;
+var Server;
  io.on('connection', function (socket) {
 
 
 
-if(clients.length==0)
-{
-  socket.emit("isServer",true);	
-}else{
- socket.emit("isServer",false);	
-}
 
 clients.push(socket);
 
@@ -41,6 +36,15 @@ clients.push(socket);
 	 //user.socket = socket;
 	 console.log(user);
 	 var userIndex = users.findIndex(u => u.id === user.id || u.name === user.name);
+
+	 if (user.name === 'server')
+     {
+         socket.emit("isServer",true);
+         Server = socket;
+     }else {
+		 socket.emit("isServer",false);
+	 }
+
 	 if (userIndex === -1) {
 
 		 var dd = userCtrl.login({name: user.name, email: user.id}, function (u) {
@@ -48,7 +52,7 @@ clients.push(socket);
 			 if (u) {
 				 console.log('has user', u);
 				 user._id = u._id;
-				 users.push(user);
+				 //users.push(user);
 				 tempUser = u;
 				 console.log(users);
 			 }
@@ -75,17 +79,18 @@ clients.push(socket);
      socket.on("call Server",function(user){
          console.log("call Server "+user.id);
          // socket[user.id].emit("receive Call",user.name);
-         socket.broadcast.emit("receive Call",user);
+       //  socket.broadcast.emit("receive Call",user);
+         Server.emit("receive Call",{name:"bog", id:socket.id});
      });
     socket.on('messageRTC', function (message) {
       console.log('messag',message);
       if (message.type !== 'answer'){
         socket.broadcast.to(message.id).emit('messageRTC', message);
       }
-      else { 
+      else {
           socket.broadcast.emit('messageRTC', message);
       }
-                
+
         //socket.broadcast.to(message.id).emit('messageRTC', message);
     });
   socket.on('create or join', function(room) {
@@ -122,9 +127,11 @@ clients.push(socket);
   });
   
    socket.on('start-recording',function(){
+        console.log('start-recording command'+socket.id);
 		socket.broadcast.emit('server record-start');
 });
    socket.on('stop-recording',function(){
+        console.log('stop-recording command'+socket.id);
 		socket.broadcast.emit('server record-stop');
 });
 
@@ -132,6 +139,8 @@ clients.push(socket);
 
   socket.on('bye', function(){
     clients.pop(socket);
+    debugger;
+    console.log(socket.id);
     console.log('received bye');
   });
 	
@@ -178,7 +187,7 @@ clients.push(socket);
         users.splice(deleteIndex, 1);
       }
 
-      socket.broadcast.emit("users connected", users);
+      io.emit("users connected", users);
    });
 
 socket.on('sendImage',function(data){

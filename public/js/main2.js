@@ -90,7 +90,7 @@ socket.on("messageRTC", function (message) {
                     break;
         case "answer": 
                       if (!setRemote) //not revceive twice data
-                      pc.setRemoteDescription(message).catch((e) => console.log(error));
+                      pc.setRemoteDescription(message).catch((error) => console.log(error));
                       setRemote = true;
                       break;
         case "candidate": 
@@ -184,13 +184,11 @@ if (location.hostname !== 'localhost') {
   );
 }
 
-
-
 window.onbeforeunload = function() {
-  sendMessage('bye');
+  socket.emit('bye');
 };
 
-///////////////////////////// Recording Stream
+///////////////////////////// Recording Stream //////////////////////////
 var mediaRecorder;
 var recordedBlobs = [];
 var chunks = [];
@@ -198,21 +196,33 @@ var chunks = [];
 
 var  recordButton = document.getElementById("startRecordingBtn");
 recordButton.addEventListener('click', startRecording, false);
-var  downloadRecordingBtn = document.getElementById("downloadRecordingBtn");
-downloadRecordingBtn.addEventListener('click', download, false);
+// var  downloadRecordingBtn = document.getElementById("downloadRecordingBtn");
+// downloadRecordingBtn.addEventListener('click', download, false);
+var stopRecordingBtn = document.getElementById('stopRecordingBtn');
+stopRecordingBtn.addEventListener('click',stopRecording,false);
+//stopRecordingBtn.disable = true;
+
+
 
 function startRecording() {
-  if (currentUser.name!=='server')
-{
-  socket.emit('start-recording');
-}else{
 
-  mediaRecorder.start(30);
-  socket.emit("video-start");
-  mediaRecorder.ondataavailable =handleDataAvailable;
-      console.log(mediaRecorder.state);
-      console.log("recorder started");
-}
+  if (currentUser.name!=='server')
+    {
+    	alert("startR");
+		socket.emit('start-recording');
+		recordButton.className ='btn btn-success';
+	    stopRecordingBtn.disable = false;
+    }
+    else
+	{
+		recordButton.className ='btn btn-success';
+		stopRecordingBtn.disable = false;
+		mediaRecorder.start(30);
+		socket.emit("video-start");
+		mediaRecorder.ondataavailable =handleDataAvailable;
+		console.log(mediaRecorder.state);
+		console.log("recorder started");
+    }
 }
 
 function handleDataAvailable(event) {
@@ -222,17 +232,23 @@ function handleDataAvailable(event) {
   }
 }
 function stopRecording() {
-  if (currentUser.name!=='server')
-{
-  socket.emit('stop-recording');
-}else{
-      mediaRecorder.stop();
-      socket.emit('video-end');
-      console.log(mediaRecorder.state);
-      console.log("recorder stopped");
-      //record.style.background = "";
-      //record.style.color = "";
-}
+
+
+	if (currentUser.name !== 'server')
+	{
+		recordButton.className ='btn btn-primary';
+		stopStreamBtn.disable = true;
+		socket.emit('stop-recording');
+	}
+	else
+	{
+		recordButton.className ='btn btn-primary';
+		stopStreamBtn.disable = true;
+		mediaRecorder.stop();
+		socket.emit('video-end');
+		console.log(mediaRecorder.state);
+		console.log("recorder stopped");
+	}
 }
 function download() {
   //stopRecording();
@@ -258,7 +274,44 @@ function download() {
   }, 100);
 }
 
+///////////////////////////Taking picture //////////////////////////
+var canvas = document.querySelector('canvas');
+canvas.vidth = 480;
+canvas.height = 360;
 
+var savePictureBtn = document.getElementById('savePictureHref');
+savePictureBtn.addEventListener('click',savePicture,false);
+//savePictureBtn.disable = true;
+var takePictureBtn = document.getElementById('takePictureBtn');
+takePictureBtn.addEventListener('click',takePicture,false);
+
+function savePicture() {
+	var dt = canvas.toDataURL('image/png');
+	/* Change MIME type to trick the browser to downlaod the file instead of displaying it */
+	dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
+
+	let date = new Date().getMilliseconds();
+	let attr = savePictureBtn.attributes['download'].value='Canvas'+date+'.png';
+
+	/* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
+	dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
+
+	this.href = dt;
+}
+function takePicture() {
+	var video = getVideo();
+	canvas.width = video.videoWidth;
+	canvas.height = video.videoHeight;
+	canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+}
+function getVideo() {
+	if(isServer && currentUser.name==="server"){
+		return localVideo;
+	}
+	else {
+		return remoteVideo;
+	}
+}
 
 /////////////////////////////////////////////////////////
 
