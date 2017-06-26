@@ -21,19 +21,16 @@
       <button id="startRecordingBtn" class="btn btn-default btn-primary">Inregistreaza</button>
       <button id="stopRecordingBtn" download="Canvas.webm" class="btn btn-default btn-primary">Stop inregistrare</button>
     </div>
-  <div class="row">
+  <div class="row" id="localVideoDiv">
       {{!--<video id="localvideo" autoplay style="width:640px;height:480px"></video>--}}
        <video id="localvideo" autoplay style="width:340px;height:280px"></video>
-      <canvas></canvas>
   </div>
   <div class="row">
-    <div class="col-sm-6">
-      <video id="remotevideo" autoplay style="width:640px;height:480px"></video>
-    </div>
-    <div class="col-sm-6">
-      <canvas></canvas>
-    </div>
+      <video id="remotevideo" autoplay style="width:340px;height:280px"></video>
   </div>
+  <div class="row">
+        <canvas style="width:340px;height:280px"></canvas>
+    </div>
 </div>
 
 

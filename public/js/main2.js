@@ -34,9 +34,9 @@ var socket = io.connect();
 socket.on('isServer',function(data){
     isServer=data;
     input.value=isServer;
-    if (isServer)
+    if (!isServer)
     {
-          
+        localVideoDiv.style.display = 'none';
     }
 
 });
@@ -114,10 +114,19 @@ var loginButton = document.getElementById("loginBtn");
 loginButton.addEventListener('click', login, false);
 var loginInput = document.getElementById("loginInput");
 
+var serverBtn = document.getElementById("serverBtn");
+serverBtn.addEventListener('click', setServer, false);
+
+function setServer() {
+   loginInput.value = "server";
+   login();
+}
+
 var currentUser,remoteUser;
 var serverUser;
 function connect(){
-  alert("connect");
+   loginInput.value = "bog";
+   login();
 }
 function login(){
  var name = loginInput.value;
@@ -202,7 +211,7 @@ var stopRecordingBtn = document.getElementById('stopRecordingBtn');
 stopRecordingBtn.addEventListener('click',stopRecording,false);
 //stopRecordingBtn.disable = true;
 
-
+var localVideoDiv = document.getElementById('localVideoDiv');
 
 function startRecording() {
 
