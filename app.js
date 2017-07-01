@@ -27,6 +27,7 @@ app.use(express.static(path.join(__dirname, "/public")));
 // app.use(express.static(path.join(__dirname, 'public')));
 // app.use(express.static(path.join(__dirname, 'recordings'))); 
 app.use("/recordings",express.static(path.join(__dirname, "/recordings")));
+app.use("/pictures",express.static(path.join(__dirname, "/pictures")));
 app.use('/', index);
 app.use('/users', users);  
 var db ={};

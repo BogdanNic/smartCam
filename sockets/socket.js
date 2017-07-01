@@ -125,6 +125,7 @@ clients.push(socket);
       });
     }
   });
+
   
    socket.on('start-recording',function(){
         console.log('start-recording command'+socket.id);
@@ -134,6 +135,14 @@ clients.push(socket);
         console.log('stop-recording command'+socket.id);
 		socket.broadcast.emit('server record-stop');
 });
+     socket.on('take-picture',function () {
+        console.log('take-picture'+socket.id);
+        socket.broadcast.emit('server take-picture');
+     });
+	socket.on('send-picture',function (url) {
+		console.log('send-picture'+socket.id+url);
+		socket.broadcast.emit('server send-picture',url);
+	 });
 
 
 
@@ -192,10 +201,18 @@ clients.push(socket);
 
 socket.on('sendImage',function(data){
   
-var buf = Buffer.from(data, 'base64'); // Ta-da
-fs.writeFile('myFile.png', buf, function(err) {
+	var imageBuffer = Buffer.from(data, 'base64');
+	var tempName =path.join('./','pictures',uuid.v1()+'.png');
+	fs.writeFile(tempName, imageBuffer, function(err) {
     if(err)
-	console.log(err);
+    {
+		console.log(err);
+    }
+	else
+	{
+		io.emit('server send-picture',tempName);
+    }
+
   });
   //console.log(data);
 });

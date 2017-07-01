@@ -73,6 +73,15 @@ socket.on('server record-start',function(){
 socket.on('server record-stop',function(){
 	stopRecording();
 });
+socket.on('server take-picture',function(){
+	takePicture();
+});
+socket.on('server send-picture',function(url){
+
+	console.log('server send-picture '+url);
+	savePictureLink(url);
+});
+
 
 //bug in socket.io TODO: Fixit
 var setRemote=false;//for receiveing data 
@@ -122,6 +131,10 @@ function setServer() {
    login();
 }
 
+if (location.hostname === 'localhost')
+{
+		setServer();
+}
 var currentUser,remoteUser;
 var serverUser;
 function connect(){
@@ -289,12 +302,12 @@ canvas.vidth = 480;
 canvas.height = 360;
 
 var savePictureBtn = document.getElementById('savePictureHref');
-savePictureBtn.addEventListener('click',savePicture,false);
+savePictureBtn.addEventListener('click',savePictureOld,false);
 //savePictureBtn.disable = true;
 var takePictureBtn = document.getElementById('takePictureBtn');
 takePictureBtn.addEventListener('click',takePicture,false);
 
-function savePicture() {
+function savePictureOld() {
 	var dt = canvas.toDataURL('image/png');
 	/* Change MIME type to trick the browser to downlaod the file instead of displaying it */
 	dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
@@ -305,13 +318,25 @@ function savePicture() {
 	/* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
 	dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
 
-	this.href = dt;
+	//this.href = "http://"+window.location.host+"/images/image1.png";
+	console.log()
+}
+function savePictureLink(url) {
+	console.log("picture url "+ url);
+
+	savePictureBtn.href ="http://"+window.location.host+'/'+url.replace('\\','/');
 }
 function takePicture() {
-	var video = getVideo();
-	canvas.width = video.videoWidth;
-	canvas.height = video.videoHeight;
-	canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+	if(isServer && currentUser.name==="server") {
+		var video = localVideo;
+		canvas.width = video.videoWidth;
+		canvas.height = video.videoHeight;
+		canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+		var data = canvas.toDataURL("image/png").replace(/^data:image\/(png|jpg);base64,/, '');
+		socket.emit('sendImage', data);
+	}else{
+		socket.emit('take-picture');
+	}
 }
 function getVideo() {
 	if(isServer && currentUser.name==="server"){
