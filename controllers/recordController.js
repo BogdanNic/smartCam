@@ -18,7 +18,7 @@ var record =new Record({user:user._id, location:location, duration:duration, siz
 function getRecents(callback)
 {
   Record.find().sort({'createAt':-1}).limit(10).exec(function(err,recents){
-      //console.log(recents);
+      console.log(recents);
       if (!err){
         callback(recents);
       }

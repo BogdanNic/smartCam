@@ -81,7 +81,11 @@ socket.on('server send-picture',function(url){
 	console.log('server send-picture '+url);
 	savePictureLink(url);
 });
-
+socket.on('ipaddr',function (ip) {
+	// if(location.hostname === 'localhost'){
+	// 	document.title = ip;
+	// }
+})
 
 //bug in socket.io TODO: Fixit
 var setRemote=false;//for receiveing data 
@@ -134,6 +138,7 @@ function setServer() {
 if (location.hostname === 'localhost')
 {
 		setServer();
+		socket.emit('ipaddr');
 }
 var currentUser,remoteUser;
 var serverUser;

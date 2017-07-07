@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node www"
+    "start": "node www",
+    "stop": "killall -KILL node"
   },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",

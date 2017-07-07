@@ -2,6 +2,7 @@ var User =require ('../models/userSchema');
 var Record = require('../models/recordSchema');
 var recordCtrl = require('../controllers/recordController');
 var userCtrl = require('../controllers/userController');
+var os = require('os');
 var uuid=require("node-uuid");
 module.exports=function(io,fs,path){
 var clients = [];
@@ -125,6 +126,13 @@ clients.push(socket);
       });
     }
   });
+	socket.on('close-server',function () {
+	//disconect client
+		io.sockets.sockets.forEach(function(s) {
+		s.disconnect(true);
+	});
+	}
+	);
 
   
    socket.on('start-recording',function(){
