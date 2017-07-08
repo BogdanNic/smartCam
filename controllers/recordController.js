@@ -17,7 +17,7 @@ var record =new Record({user:user._id, location:location, duration:duration, siz
 
 function getRecents(callback)
 {
-  Record.find().sort({'createAt':-1}).limit(10).exec(function(err,recents){
+  Record.find().sort({'createdAt':-1}).limit(10).exec(function(err,recents){
       console.log(recents);
       if (!err){
         callback(recents);
@@ -50,7 +50,7 @@ function get(callback)
            
 
          },
-     },{$sort: {'_id.month':1}},
+     },{$sort: {'_id.month':-1}},
           {
        "$group": 
          {
@@ -68,7 +68,7 @@ function get(callback)
    
    ],function(err,arr){
 if(err) console.log(err);
-     var monthsName= ['Ianuarie','Februrie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
+     var monthsName= ['Test','Ianuarie','Februrie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
         arr.forEach(function (element) {
         if (element.months)
           myM = element.months;
